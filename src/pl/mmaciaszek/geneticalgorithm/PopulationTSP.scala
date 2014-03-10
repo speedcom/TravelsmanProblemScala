@@ -11,15 +11,12 @@ object PopulationTSP {
     def evalFunc(genotype: Genotype[Long]): Long = {
       val genes = genotype.genes
       var sum = 0L
-      var t = genes.size
       var i = 0
       var j = 1
-      while (t > 1) {
+      for (t <- genes.size until 1 by -1) {
         sum += cities.getDistanceBetweenCities(genes(i).toInt, genes(j).toInt)
-
         i += 1
         j += 1
-        t -= 1
       }
       sum += cities.getDistanceBetweenCities(genes(0).toInt, genes(genes.size - 1).toInt)
       sum
@@ -59,9 +56,9 @@ class PopulationTSP extends Population[Long, Long] {
 
   // Tournament Selection
   def selection(phenotypes: MutableList[PhenotypeType]): MutableList[PhenotypeType] = {
+    
     val phenotypesSize = phenotypes.size
     val tournamentSize = if (phenotypesSize < 4) phenotypesSize else 4
-
     val children = MutableList[PhenotypeType]()
     
     for (t <- 1  to phenotypesSize) {
