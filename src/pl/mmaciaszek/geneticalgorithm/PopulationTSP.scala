@@ -159,7 +159,7 @@ class PopulationTSP extends Population[Long, Long] {
     crossOveredPhenotypes
   }
 
-  // Inversion Mutation
+  // Inversion Mutation - jedzie po kazdym fenotype i z danym po probuje go zmutowac
   def mutation(x: PhenotypeType, probability: Double): PhenotypeType = {
     val r = Random.nextDouble
     if (r <= probability) {
