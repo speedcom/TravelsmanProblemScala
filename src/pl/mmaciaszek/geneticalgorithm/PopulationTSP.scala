@@ -11,12 +11,8 @@ object PopulationTSP {
     def evalFunc(genotype: Genotype[Long]): Long = {
       val genes = genotype.genes
       var sum = 0L
-      var i = 0
-      var j = 1
-      for (t <- genes.size until 1 by -1) {
-        sum += cities.getDistanceBetweenCities(genes(i).toInt, genes(j).toInt)
-        i += 1
-        j += 1
+      for (t <- 1 until genes.size) {
+        sum += cities.getDistanceBetweenCities(genes(t-1).toInt, genes(t).toInt)
       }
       sum += cities.getDistanceBetweenCities(genes(0).toInt, genes(genes.size - 1).toInt)
       sum
@@ -84,6 +80,7 @@ class PopulationTSP extends Population[Long, Long] {
 
       (i, j)
     }
+    // TODO - do edycji jakosc kodu
     def createChild(parent1: PhenotypeType, parent2: PhenotypeType)(subIndex: Tuple2[Int, Int]) = {
       val genotypeSize = parent1.genotype.genes.size
       val genesX = parent1.genotype.genes.slice(subIndex._1, subIndex._2)
