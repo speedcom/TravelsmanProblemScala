@@ -54,40 +54,37 @@ object TravelsmanProblemCitiesClient {
         //println("end of evaluation")
       }
       println("\n---------")
-      println("Dane statystyczne | Instacja nr " + i)
+      println("Statistical data | INSTANCE nr " + i)
 
-      // najlepszy osobnik z iteracji
       type PhenotypeType = Phenotype[Long, Long]
+
       def findTheBest(x: PhenotypeType, y: PhenotypeType) = if (x.cost > y.cost) y else x
       val theBestSolution = population.parents.reduceLeft(findTheBest)
       THEBESTSOLUTION += theBestSolution.cost
-      println("Najlepszy osobnik: " + theBestSolution.cost)
+      println("The best solution: " + theBestSolution.cost)
 
-      // najgorszy osobnik z iteracji
       def findTheWorst(x: PhenotypeType, y: PhenotypeType) = if (x.cost > y.cost) x else y
       val theWorstSolution = population.parents.reduceLeft(findTheWorst)
       THEWORSTSOLUTION += theWorstSolution.cost
-      println("Najgorszy osobnik: " + theWorstSolution.cost)
+      println("The worst solution: " + theWorstSolution.cost)
 
-      // srednia wartosc w populacji dla iteracji
       val sumCost = population.parents.foldLeft(0L)((acc, b) => acc + b.cost)
       val avg = sumCost / population.parents.size
       AVG += avg
-      println("Srednia wartosc w populacji: " + avg)
+      println("AVG solution: " + avg)
 
-      // odchylenie standardowe dla iteracji
       val w = population.parents.foldLeft(0.0)((acc, b) => acc + (b.cost - avg) * (b.cost - avg))
       val ww = w / population.parents.size
       val sigma = Math.sqrt(ww)
       STANDARD_DEVIATION += sigma
-      println("Odchylenie standardowe: " + sigma)
+      println("Standard deviation: " + sigma)
       println("---------")
     }
-    
-    println("Najlepszy osobnik = " + THEBESTSOLUTION.min)
-    println("Najgorszy osobnik = " + THEWORSTSOLUTION.max)
-    println("Œredni osobnik AVG = " + AVG/INSTANCES)
-    println("Odchylenie standardowe AVG = " + STANDARD_DEVIATION/INSTANCES)
+    println("\nFINAL RESULTS")
+    println("The best solution = " + THEBESTSOLUTION.min)
+    println("The worst solution = " + THEWORSTSOLUTION.max)
+    println("AVG solution = " + AVG/INSTANCES)
+    println("Standard deviation = " + STANDARD_DEVIATION/INSTANCES)
   }
 
 }
