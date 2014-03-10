@@ -22,7 +22,6 @@ object PopulationTSP {
         t -= 1
       }
       sum += cities.getDistanceBetweenCities(genes(0).toInt, genes(genes.size - 1).toInt)
-      println("suma= " + sum)
       sum
     }
 
@@ -73,11 +72,11 @@ class PopulationTSP extends Population[Long, Long] {
       // choose participants to tournament
       val randomlyChoosenIndexes = Seq.fill(tournamentSize)(Random.nextInt(phenotypesSize))
       val tournamentParticipants = randomlyChoosenIndexes.foldLeft(MutableList[PhenotypeType]())((acc, i) => acc += phenotypes(i))
-
       // select the best participant 
       def haveFight(x: PhenotypeType, y: PhenotypeType) = if (x.cost > y.cost) x else y
       val winner = tournamentParticipants.reduceLeft(haveFight)
-
+      
+      t += 1
       children += winner
     }
     children
@@ -136,9 +135,8 @@ class PopulationTSP extends Population[Long, Long] {
     }
 
     val crossOveredPhenotypes = MutableList[PhenotypeType]()
-    var size = 0
-    while (size <= phenotypes.size) {
-      println("size = " + size)
+    var size = 1
+    while (size <= phenotypes.size/2) {
       val i = Random.nextInt(phenotypes.size - 1)
       val j = Random.nextInt(phenotypes.size - 1)
 
@@ -159,20 +157,21 @@ class PopulationTSP extends Population[Long, Long] {
     crossOveredPhenotypes
   }
 
-  // Inversion Mutation - jedzie po kazdym fenotype i z danym po probuje go zmutowac
-  def mutation(x: PhenotypeType, probability: Double): PhenotypeType = {
-    val r = Random.nextDouble
-    if (r <= probability) {
-      val ceiling = x.genotype.genes.size
-      val j = Random.nextInt(ceiling)
-      val k = Random.nextInt(ceiling)
+  // Inversion Mutation
+  def mutation(phenotypes: MutableList[PhenotypeType], probability: Double): Unit = {
+    
+    phenotypes foreach { x => 
+      val r = Random.nextDouble
+      if (r <= probability) {
+        val ceiling = x.genotype.genes.size
+        val j = Random.nextInt(ceiling)
+        val k = Random.nextInt(ceiling)
 
-      // swap values of choosen genes
-      val l = x.genotype.genes(j)
-      x.genotype.genes(j) = x.genotype.genes(k)
-      x.genotype.genes(k) = l
-
-      x
-    } else x
+       // swap values of choosen genes
+       val l = x.genotype.genes(j)
+       x.genotype.genes(j) = x.genotype.genes(k)
+       x.genotype.genes(k) = l
+      }
+    }
   }
 }
