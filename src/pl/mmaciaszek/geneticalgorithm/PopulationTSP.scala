@@ -41,10 +41,8 @@ object PopulationTSP {
 
       def addPhenotype(phenotype: Phenotype[Long, Long]) = phenotypes += phenotype
 
-      var t = 1
-      while (t <= populationSize) {
+      for(t <- 1 to populationSize) {
         addPhenotype(createPhenotype)
-        t += 1
       }
       phenotypes
     }
@@ -65,18 +63,14 @@ class PopulationTSP extends Population[Long, Long] {
     val tournamentSize = if (phenotypesSize < 4) phenotypesSize else 4
 
     val children = MutableList[PhenotypeType]()
-
-    var t = 1
-    while (t <= phenotypesSize) {
-
+    
+    for (t <- 1  to phenotypesSize) {
       // choose participants to tournament
       val randomlyChoosenIndexes = Seq.fill(tournamentSize)(Random.nextInt(phenotypesSize))
       val tournamentParticipants = randomlyChoosenIndexes.foldLeft(MutableList[PhenotypeType]())((acc, i) => acc += phenotypes(i))
       // select the best participant 
       def haveFight(x: PhenotypeType, y: PhenotypeType) = if (x.cost > y.cost) x else y
       val winner = tournamentParticipants.reduceLeft(haveFight)
-      
-      t += 1
       children += winner
     }
     children
@@ -93,7 +87,6 @@ class PopulationTSP extends Population[Long, Long] {
 
       (i, j)
     }
-
     def createChild(parent1: PhenotypeType, parent2: PhenotypeType)(subIndex: Tuple2[Int, Int]) = {
       val genotypeSize = parent1.genotype.genes.size
       val genesX = parent1.genotype.genes.slice(subIndex._1, subIndex._2)
@@ -124,7 +117,6 @@ class PopulationTSP extends Population[Long, Long] {
 
       fenotype
     }
-
     def createChilds(parent1: PhenotypeType, parent2: PhenotypeType)(subIndex: Tuple2[Int, Int]) = {
       // create childs
       val subIndex = createSubIndex(parent1)
@@ -135,8 +127,8 @@ class PopulationTSP extends Population[Long, Long] {
     }
 
     val crossOveredPhenotypes = MutableList[PhenotypeType]()
-    var size = 1
-    while (size <= phenotypes.size/2) {
+    val phenotypeSize = phenotypes.size/2 // it's beacause parents create two childs
+    for(t <- 1 to phenotypeSize) {
       val i = Random.nextInt(phenotypes.size - 1)
       val j = Random.nextInt(phenotypes.size - 1)
 
@@ -152,7 +144,6 @@ class PopulationTSP extends Population[Long, Long] {
         crossOveredPhenotypes += p1
         crossOveredPhenotypes += p2
       }
-      size += 1
     }
     crossOveredPhenotypes
   }

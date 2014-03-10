@@ -16,10 +16,10 @@ object TravelsmanProblemCitiesClient {
     val populationSize = 500
     val population = PopulationTSP(cities, populationSize)
 
-    var iterationNumber = 100
-    while (iterationNumber > 0) {
+    var generationsNumber = 100
+    while (generationsNumber > 0) {
       println("---------")
-      println("iteration number = " + iterationNumber)
+      println("iteration number = " + generationsNumber)
 
       // evaluate
       println("starting evaluation...")
@@ -40,7 +40,7 @@ object TravelsmanProblemCitiesClient {
 
       population.parents = population.children
 
-      iterationNumber -= 1
+      generationsNumber -= 1
     }
     println("\n---------")
     println("Dane statystyczne...")
