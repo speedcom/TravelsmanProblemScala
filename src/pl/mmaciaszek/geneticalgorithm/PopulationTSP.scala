@@ -18,16 +18,18 @@ object PopulationTSP {
       sum
     }
 
-    // TODO - Random.shuffle moze powtarzac ciagi
     def createPhenotypes = {
 
       val indexes = (1L to cities.getCitiesSize).toList
       val phenotypes = MutableList[Phenotype[Long, Long]]()
 
       def createPhenotype = {
-        val genes = Random.shuffle(indexes)
-        val mutableGenes = genes.foldLeft(MutableList[Long]())((acc, e) => acc += e)
-        val genotype = Genotype(mutableGenes)
+        var genes = MutableList[Long]()
+        do {
+          val g = Random.shuffle(indexes)
+          genes = g.foldLeft(MutableList[Long]())((acc, e) => acc += e)
+        } while(phenotypes.exists(_.genotype equals genes))
+        val genotype = Genotype(genes)
         val phenotype = Phenotype(genotype, 0L)(evalFunc)
         phenotype
       }
@@ -80,14 +82,12 @@ class PopulationTSP extends Population[Long, Long] {
 
       (i, j)
     }
-    // TODO - do edycji jakosc kodu
     def createChild(parent1: PhenotypeType, parent2: PhenotypeType)(subIndex: Tuple2[Int, Int]) = {
       val genotypeSize = parent1.genotype.genes.size
       val genesX = parent1.genotype.genes.slice(subIndex._1, subIndex._2)
       // inversion of second fenotype genes
-      val genesY = parent2.genotype.genes.slice(subIndex._2 + 1, genotypeSize) ++ parent2.genotype.genes.slice(0, subIndex._2)
-
-      var t = genotypeSize - subIndex._2 + 1;
+      val genesY = parent2.genotype.genes.slice(subIndex._2, genotypeSize) ++ parent2.genotype.genes.slice(0, subIndex._2)
+      var t = genotypeSize - subIndex._2;
       val genesXright = genesX
       genesY foreach { x =>
         if (t > 0 && !genesX.exists(_ == x)) {
@@ -95,8 +95,8 @@ class PopulationTSP extends Population[Long, Long] {
           t -= 1
         }
       }
-
-      t = subIndex._1 - 1
+      
+      t = subIndex._1
       val genesXleft = scala.collection.mutable.MutableList[Long]()
       genesY foreach { x =>
         if (t > 0 && !genesX.exists(_ == x)) {
@@ -104,10 +104,9 @@ class PopulationTSP extends Population[Long, Long] {
           t -= 1
         }
       }
-      val finalGenesX = genesXleft ++ genesXright
-
-      val genotype = Genotype(finalGenesX)
-      val fenotype = Phenotype(genotype, 0L)(parent1.evalFunc)
+      val finalGenes = genesXleft ++ genesXright
+      val genotype = Genotype(finalGenes)
+      val fenotype = Phenotype(genotype, cost = 0L)(parent1.evalFunc)
 
       fenotype
     }

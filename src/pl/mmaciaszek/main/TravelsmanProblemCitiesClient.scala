@@ -23,8 +23,8 @@ object TravelsmanProblemCitiesClient {
     // options
     val probabilityOfCrossover = 0.7
     val probabilityOfMutation = 0.01
-    val populationSize = 500
-    val generationsNumber = 100
+    val populationSize = 1000
+    val generationsNumber = 10
 
     for (i <- 1 to INSTANCES) {
 
@@ -34,7 +34,7 @@ object TravelsmanProblemCitiesClient {
       for (i <- 1 to generationsNumber) {
 
         // selection
-        //println("starting selection...")
+        // println("----\nstarting selection...")
         population.children = population.selection(population.parents)
         //println("end of selection.")
         // crossover
@@ -83,8 +83,8 @@ object TravelsmanProblemCitiesClient {
     println("\nFINAL RESULTS")
     println("The best solution = " + THEBESTSOLUTION.min)
     println("The worst solution = " + THEWORSTSOLUTION.max)
-    println("AVG solution = " + AVG/INSTANCES)
-    println("Standard deviation = " + STANDARD_DEVIATION/INSTANCES)
+    println("AVG solution = " + AVG / INSTANCES)
+    println("Standard deviation = " + STANDARD_DEVIATION / INSTANCES)
   }
 
 }
