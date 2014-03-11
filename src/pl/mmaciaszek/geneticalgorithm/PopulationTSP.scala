@@ -28,7 +28,7 @@ object PopulationTSP {
         do {
           val g = Random.shuffle(indexes)
           genes = g.foldLeft(MutableList[Long]())((acc, e) => acc += e)
-        } while(phenotypes.exists(_.genotype equals genes))
+        } while(phenotypes.exists(_.genotype.genes equals genes))
         val genotype = Genotype(genes)
         val phenotype = Phenotype(genotype, 0L)(evalFunc)
         phenotype
@@ -87,7 +87,8 @@ class PopulationTSP extends Population[Long, Long] {
       val genesX = parent1.genotype.genes.slice(subIndex._1, subIndex._2)
       // inversion of second fenotype genes
       val genesY = parent2.genotype.genes.slice(subIndex._2, genotypeSize) ++ parent2.genotype.genes.slice(0, subIndex._2)
-      var t = genotypeSize - subIndex._2;
+      
+      var t = genotypeSize - subIndex._2
       val genesXright = genesX
       genesY foreach { x =>
         if (t > 0 && !genesX.exists(_ == x)) {

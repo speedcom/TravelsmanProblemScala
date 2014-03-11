@@ -7,13 +7,21 @@ import scala.collection.mutable.MutableList
 
 object TravelsmanProblemCitiesClient {
 
+  def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
+    val p = new java.io.PrintWriter(f)
+    try { op(p) } finally { p.close() }
+  }
+
+  def findTheWorst(x: Phenotype[Long, Long], y: Phenotype[Long, Long]) = if (x.cost > y.cost) x else y
+  def findTheBest(x: Phenotype[Long, Long], y: Phenotype[Long, Long]) = if (x.cost > y.cost) y else x
+
   def main(args: Array[String]): Unit = {
 
     val INSTANCES = 10
     var AVG = 0.0
     var STANDARD_DEVIATION = 0.0
-    var THEBESTSOLUTION = MutableList[Long]()
-    var THEWORSTSOLUTION = MutableList[Long]()
+    var THEBESTSOLUTIONS = MutableList[Long]()
+    var THEWORSTSOLUTIONS = MutableList[Long]()
 
     val cityFilePath = "C:\\Users\\Mateusz\\workspace\\TravelsmanProblemScala\\resources\\a280.tsp"
     //    val cityFilePath = "C:\\Users\\Mateusz\\workspace\\TravelsmanProblemScala\\resources\\ch150.tsp"
@@ -23,49 +31,46 @@ object TravelsmanProblemCitiesClient {
     // options
     val probabilityOfCrossover = 0.7
     val probabilityOfMutation = 0.01
-    val populationSize = 1000
-    val generationsNumber = 10
+    val populationSize = 100
+    val generationsNumber = 20
 
     for (i <- 1 to INSTANCES) {
 
       val population = PopulationTSP(cities, populationSize)
       population.evaluate(population.parents)
 
-      for (i <- 1 to generationsNumber) {
+      val generationsData = new StringBuffer
+      for (g <- 1 to generationsNumber) {
 
-        // selection
-        // println("----\nstarting selection...")
         population.children = population.selection(population.parents)
-        //println("end of selection.")
-        // crossover
-        //println("starting crossover...")
         population.children = population.crossover(population.children, probabilityOfCrossover)
-        //println("end of crossover.")
-        // mutation
-        //println("starting mutation...")
         population.mutation(population.children, probabilityOfMutation)
-        //println("end of mutation.")
-
         population.parents = population.children
-
-        // evaluate
-        //println("starting evaluation...")
         population.evaluate(population.parents)
-        //println("end of evaluation")
+
+        // do pliku z danej instancji zapisujemy:
+        // - nr populacji
+        // - theBest, theWorst, AVG osobnik
+        val theBest = population.parents.reduceLeft(findTheBest).cost
+        val theWorst = population.parents.reduceLeft(findTheWorst).cost
+        val avg = population.parents.foldLeft(0L)((acc, b) => acc + b.cost) / population.parents.size
+        val data = g + " " + theBest + " " + theWorst + " " + avg + "\n"
+        generationsData.append(data)
       }
+      import java.io._
+      printToFile(new File("results\\r"+i+".txt"))(p => {
+        p.println(generationsData.toString())
+      })
+      
       println("\n---------")
       println("Statistical data | INSTANCE nr " + i)
 
-      type PhenotypeType = Phenotype[Long, Long]
-
-      def findTheBest(x: PhenotypeType, y: PhenotypeType) = if (x.cost > y.cost) y else x
       val theBestSolution = population.parents.reduceLeft(findTheBest)
-      THEBESTSOLUTION += theBestSolution.cost
+      THEBESTSOLUTIONS += theBestSolution.cost
       println("The best solution: " + theBestSolution.cost)
 
-      def findTheWorst(x: PhenotypeType, y: PhenotypeType) = if (x.cost > y.cost) x else y
       val theWorstSolution = population.parents.reduceLeft(findTheWorst)
-      THEWORSTSOLUTION += theWorstSolution.cost
+      THEWORSTSOLUTIONS += theWorstSolution.cost
       println("The worst solution: " + theWorstSolution.cost)
 
       val sumCost = population.parents.foldLeft(0L)((acc, b) => acc + b.cost)
@@ -79,12 +84,14 @@ object TravelsmanProblemCitiesClient {
       STANDARD_DEVIATION += sigma
       println("Standard deviation: " + sigma)
       println("---------")
+      
+      
     }
+
     println("\nFINAL RESULTS")
-    println("The best solution = " + THEBESTSOLUTION.min)
-    println("The worst solution = " + THEWORSTSOLUTION.max)
+    println("The best solution = " + THEBESTSOLUTIONS.min)
+    println("The worst solution = " + THEWORSTSOLUTIONS.max)
     println("AVG solution = " + AVG / INSTANCES)
     println("Standard deviation = " + STANDARD_DEVIATION / INSTANCES)
   }
-
 }
