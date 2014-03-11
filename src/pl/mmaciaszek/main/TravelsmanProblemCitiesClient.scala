@@ -31,7 +31,7 @@ object TravelsmanProblemCitiesClient {
     // options
     val probabilityOfCrossover = 0.7
     val probabilityOfMutation = 0.01
-    val populationSize = 100
+    val populationSize = 500
     val generationsNumber = 20
 
     for (i <- 1 to INSTANCES) {
