@@ -46,6 +46,9 @@ object PopulationTSP {
       parents = createPhenotypes
     }
   }
+
+  def chooseTheBestPhenotype(x: Phenotype[Long, Long], y: Phenotype[Long, Long]) = if (x.cost > y.cost) y else x
+  def chooseTheWorstPhenotype(x: Phenotype[Long, Long], y: Phenotype[Long, Long]) = if (x.cost > y.cost) x else y
 }
 class PopulationTSP extends Population[Long, Long] {
   override type PhenotypeType = Phenotype[Long, Long]
@@ -59,13 +62,11 @@ class PopulationTSP extends Population[Long, Long] {
     val tournamentSize = if (phenotypesSize < 4) phenotypesSize else 4
     val children = MutableList[PhenotypeType]()
     
-    for (t <- 1  to phenotypesSize) {
-      // choose participants to tournament
+    (1 to phenotypesSize) foreach { t =>
+      // choose participants to tournament and select the best one from them
       val randomlyChoosenIndexes = Seq.fill(tournamentSize)(Random.nextInt(phenotypesSize))
       val tournamentParticipants = randomlyChoosenIndexes.foldLeft(MutableList[PhenotypeType]())((acc, i) => acc += phenotypes(i))
-      // select the best participant 
-      def haveFight(x: PhenotypeType, y: PhenotypeType) = if (x.cost > y.cost) x else y
-      val winner = tournamentParticipants.reduceLeft(haveFight)
+      val winner = tournamentParticipants.reduceLeft(PopulationTSP.chooseTheBestPhenotype)
       children += winner
     }
     children
@@ -122,7 +123,7 @@ class PopulationTSP extends Population[Long, Long] {
 
     val crossOveredPhenotypes = MutableList[PhenotypeType]()
     val phenotypeSize = phenotypes.size/2 // it's beacause parents create two childs
-    for(t <- 1 to phenotypeSize) {
+    (1 to phenotypeSize) foreach { t =>
       val i = Random.nextInt(phenotypes.size - 1)
       val j = Random.nextInt(phenotypes.size - 1)
 

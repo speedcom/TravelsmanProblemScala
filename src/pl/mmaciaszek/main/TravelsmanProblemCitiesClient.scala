@@ -4,6 +4,7 @@ import pl.mmaciaszek.city.{ LAHC_TSPlib, CitesTSP }
 import pl.mmaciaszek.geneticalgorithm.PopulationTSP
 import pl.mmaciaszek.geneticalgorithm.model.Phenotype
 import scala.collection.mutable.MutableList
+import pl.mmaciaszek.noevolutionary.RandomSearchTSP
 
 object TravelsmanProblemCitiesClient {
 
@@ -12,35 +13,33 @@ object TravelsmanProblemCitiesClient {
     try { op(p) } finally { p.close() }
   }
 
-  def findTheWorst(x: Phenotype[Long, Long], y: Phenotype[Long, Long]) = if (x.cost > y.cost) x else y
-  def findTheBest(x: Phenotype[Long, Long], y: Phenotype[Long, Long]) = if (x.cost > y.cost) y else x
-
   def main(args: Array[String]): Unit = {
 
-    val INSTANCES = 10
+    // results
     var AVG = 0.0
     var STANDARD_DEVIATION = 0.0
     var THEBESTSOLUTIONS = MutableList[Long]()
     var THEWORSTSOLUTIONS = MutableList[Long]()
 
-    val cityFilePath = "C:\\Users\\Mateusz\\workspace\\TravelsmanProblemScala\\resources\\a280.tsp"
-    //    val cityFilePath = "C:\\Users\\Mateusz\\workspace\\TravelsmanProblemScala\\resources\\ch150.tsp"
+    // options   
+    val instancesCount = 2
+    val probabilityOfCrossover = 0.7
+    val probabilityOfMutation = 0.01
+    val populationSize = 50
+    val generationsNumber = 10
+
+    // city
+    val cityFilePath = System.getProperty("user.dir") + "\\resources\\a280.tsp"
     val cities = CitesTSP(LAHC_TSPlib.getMatrixDist(cityFilePath))
     println("Number of cities = " + cities.getCitiesSize)
 
-    // options
-    val probabilityOfCrossover = 0.7
-    val probabilityOfMutation = 0.01
-    val populationSize = 500
-    val generationsNumber = 20
-
-    for (i <- 1 to INSTANCES) {
+    (1 to instancesCount) foreach { i =>
 
       val population = PopulationTSP(cities, populationSize)
       population.evaluate(population.parents)
 
       val generationsData = new StringBuffer
-      for (g <- 1 to generationsNumber) {
+      (1 to generationsNumber) foreach { g =>
 
         population.children = population.selection(population.parents)
         population.children = population.crossover(population.children, probabilityOfCrossover)
@@ -48,28 +47,27 @@ object TravelsmanProblemCitiesClient {
         population.parents = population.children
         population.evaluate(population.parents)
 
-        // do pliku z danej instancji zapisujemy:
-        // - nr populacji
-        // - theBest, theWorst, AVG osobnik
-        val theBest = population.parents.reduceLeft(findTheBest).cost
-        val theWorst = population.parents.reduceLeft(findTheWorst).cost
+        val theBest = population.parents.reduceLeft(PopulationTSP.chooseTheBestPhenotype).cost
+        val theWorst = population.parents.reduceLeft(PopulationTSP.chooseTheWorstPhenotype).cost
         val avg = population.parents.foldLeft(0L)((acc, b) => acc + b.cost) / population.parents.size
         val data = g + " " + theBest + " " + theWorst + " " + avg + "\n"
         generationsData.append(data)
       }
+
       import java.io._
-      printToFile(new File("results\\r"+i+".txt"))(p => {
-        p.println(generationsData.toString())
+      printToFile(new File("results\\instance_nr_" + i + ".txt"))(p => {
+        val labels = "Population TheBest TheWorst AVG\n"
+        p.println(labels + generationsData.toString())
       })
-      
+
       println("\n---------")
       println("Statistical data | INSTANCE nr " + i)
 
-      val theBestSolution = population.parents.reduceLeft(findTheBest)
+      val theBestSolution = population.parents.reduceLeft(PopulationTSP.chooseTheBestPhenotype)
       THEBESTSOLUTIONS += theBestSolution.cost
       println("The best solution: " + theBestSolution.cost)
 
-      val theWorstSolution = population.parents.reduceLeft(findTheWorst)
+      val theWorstSolution = population.parents.reduceLeft(PopulationTSP.chooseTheWorstPhenotype)
       THEWORSTSOLUTIONS += theWorstSolution.cost
       println("The worst solution: " + theWorstSolution.cost)
 
@@ -84,14 +82,20 @@ object TravelsmanProblemCitiesClient {
       STANDARD_DEVIATION += sigma
       println("Standard deviation: " + sigma)
       println("---------")
-      
-      
     }
 
-    println("\nFINAL RESULTS")
+    println("\nSTATISTICAL RESULTS FROM ALL INSTANCES")
     println("The best solution = " + THEBESTSOLUTIONS.min)
     println("The worst solution = " + THEWORSTSOLUTIONS.max)
-    println("AVG solution = " + AVG / INSTANCES)
-    println("Standard deviation = " + STANDARD_DEVIATION / INSTANCES)
+    println("AVG solution = " + AVG / instancesCount)
+    println("Standard deviation = " + STANDARD_DEVIATION / instancesCount)
+
+    println("\nSTATISTICAL RESULT FOR NOEVOLUTIONARY ALGHORITM")
+    val population = PopulationTSP(cities, populationSize)
+    population.evaluate(population.parents)
+    println("The best solution = " + RandomSearchTSP.getTheBestSolution(population))
+    println("The worst solution = " + RandomSearchTSP.getTheWorstSolution(population))
+    println("AVG solution = " + RandomSearchTSP.getAvgSolution(population))
+
   }
 }
