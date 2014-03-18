@@ -53,8 +53,8 @@ object PopulationTSP {
 class PopulationTSP extends Population[Long, Long] {
   override type PhenotypeType = Phenotype[Long, Long]
 
-  def evaluate(x: MutableList[PhenotypeType]): Unit = x foreach { _.evaluateCost }
-
+  def evaluate(x: MutableList[PhenotypeType]): Unit = x foreach { y => if(y.cost == 0) { y.evaluateCost} }
+  
   // Tournament Selection
   def selection(phenotypes: MutableList[PhenotypeType]): MutableList[PhenotypeType] = {
     

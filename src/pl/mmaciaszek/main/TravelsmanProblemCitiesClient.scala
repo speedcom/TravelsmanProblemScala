@@ -15,24 +15,25 @@ object TravelsmanProblemCitiesClient {
 
   def main(args: Array[String]): Unit = {
 
-    // results
+    // global results
     var AVG = 0.0
     var STANDARD_DEVIATION = 0.0
-    var THEBESTSOLUTIONS = MutableList[Long]()
+    var THEBESTSOLUTIONS  = MutableList[Long]()
     var THEWORSTSOLUTIONS = MutableList[Long]()
 
     // options   
-    val instancesCount = 2
-    val probabilityOfCrossover = 0.7
-    val probabilityOfMutation = 0.01
-    val populationSize = 50
-    val generationsNumber = 10
+    val instancesCount         = 10
+    val probabilityOfCrossover = 0.8
+    val probabilityOfMutation  = 1
+    val populationSize         = 100
+    val generationsNumber      = 100
 
     // city
     val cityFilePath = System.getProperty("user.dir") + "\\resources\\a280.tsp"
     val cities = CitesTSP(LAHC_TSPlib.getMatrixDist(cityFilePath))
     println("Number of cities = " + cities.getCitiesSize)
 
+    // alghoritm
     (1 to instancesCount) foreach { i =>
 
       val population = PopulationTSP(cities, populationSize)
@@ -47,13 +48,15 @@ object TravelsmanProblemCitiesClient {
         population.parents = population.children
         population.evaluate(population.parents)
 
+        // data from one generation
         val theBest = population.parents.reduceLeft(PopulationTSP.chooseTheBestPhenotype).cost
         val theWorst = population.parents.reduceLeft(PopulationTSP.chooseTheWorstPhenotype).cost
-        val avg = population.parents.foldLeft(0L)((acc, b) => acc + b.cost) / population.parents.size
+        val avg  = population.parents.foldLeft(0L)((acc, b) => acc + b.cost) / population.parents.size
         val data = g + " " + theBest + " " + theWorst + " " + avg + "\n"
         generationsData.append(data)
       }
 
+      // SAVE DATA TO FILE
       import java.io._
       printToFile(new File("results\\instance_nr_" + i + ".txt"))(p => {
         val labels = "Population TheBest TheWorst AVG\n"
@@ -82,9 +85,10 @@ object TravelsmanProblemCitiesClient {
       STANDARD_DEVIATION += sigma
       println("Standard deviation: " + sigma)
       println("---------")
-    }
+    } // END OF ALGHORITM
 
-    println("\nSTATISTICAL RESULTS FROM ALL INSTANCES")
+    // LOGS
+    println("\nSTATISTICAL RESULTS FOR ALL INSTANCES")
     println("The best solution = " + THEBESTSOLUTIONS.min)
     println("The worst solution = " + THEWORSTSOLUTIONS.max)
     println("AVG solution = " + AVG / instancesCount)
